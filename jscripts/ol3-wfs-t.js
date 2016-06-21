@@ -38,10 +38,16 @@ var sourceVector = new ol.source.Vector({
         }
       }).done(function(response) {
         //sourceVector.getSource().addFeatures(new ol.format.WFS().readFeatures(response));
-		console.log(response);
-		var formatWFS = new ol.format.WFS();
+		var formatWFS = new ol.format.WFS({
+                    // version: "1.1.0",
+                    // url: "http://localhost:9000/geoserver/test01/ows?service=WFS",
+                    // featurePrefix: "test01", //workspace
+                    // featureType: "test01:Districts", //layer name
+                    // featureNS: "http://bsr.ores.be/test01", 
+                    //geometryName: "DistrictGeo",  //feature name in database
+                });
 		var features = formatWFS.readFeatures(response);
-		
+		console.log(features);
 		// var config = {
 		// 	'featureNS': 'http://bsr.ores.be/test01',
 		// 	'featureType': 'Districts'
@@ -49,8 +55,6 @@ var sourceVector = new ol.source.Vector({
         // features = new ol.format.WFS(config).readFeatures(response, {
         //     featureProjection: 'EPSG:31370'
         // });
-		
-		console.log(features);
 		sourceVector.addFeatures(features);
       });
     },
@@ -251,8 +255,8 @@ var formatGML = new ol.format.GML({
 var transactWFS = function(p,f) {
 	console.log(f);
 	f.set('DistrictName', "XXX");
-	f.set('DistrictId', 12345);
-	f.setGeometryName("DistrictGeo");
+	//f.set('DistrictId', 12345);
+	//f.setGeometryName("DistrictGeo");
 	switch(p) {
 		case 'insert':
 			node = formatWFS.writeTransaction([f], null, null, formatGML);
