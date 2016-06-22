@@ -26,17 +26,11 @@ var layerVector = new ol.layer.Vector({
 				layerVector.getSource().addFeatures(features);
 			});
 		},
-		//strategy: ol.loadingstrategy.bbox,
-		strategy: function() {
-		 	return [[0, 0, 350000, 350000]];
-		}
-		// strategy: ol.loadingstrategy.createTile(new ol.tilegrid.XYZ({
-    	// 	maxZoom: 5
-  		// })),
+		strategy: ol.loadingstrategy.bbox
 	})
 });
 
-//===================================================================================================================
+// json ===================================================================================================================
 
 // var sourceVector = new ol.source.Vector({
 // 	loader: function(extent) {
@@ -59,7 +53,7 @@ var layerVector = new ol.layer.Vector({
 // 	}
 // });
 
-//===================================================================================================================
+// no code ===================================================================================================================
 
 // var sourceVector = new ol.source.Vector({
 //     format: new ol.format.GeoJSON(),
@@ -78,7 +72,7 @@ var layerVector = new ol.layer.Vector({
 // 	 }	
 // });
 
-//===================================================================================================================
+// jsonp ===================================================================================================================
 
 // var sourceVector = new ol.source.Vector({
 // 	format: new ol.format.GeoJSON(),
@@ -117,7 +111,6 @@ $('#popup-closer').on('click', function() {
 	overlayPopup.setPosition(undefined);
 });
 
-
 var mapLayer = new ol.layer.Tile({
     source: new ol.source.OSM()
 });
@@ -133,20 +126,18 @@ var map = new ol.Map({
 	 		units: 'm'
 		}),
 		center: [150000, 150000],
-		zoom: 8
+		zoom: 14
 	})
-});
-
-var dirty;
-var formatWFS = new ol.format.WFS();
-var formatGML = new ol.format.GML({
-	featureNS: 'http://bsr.ores.be/test01',
-	featureType: 'Districts',
-	srsName: 'EPSG:31370'
 });
 
 var transactWFS = function(p, f) {
 	var node;
+	var formatWFS = new ol.format.WFS();
+	var formatGML = new ol.format.GML({
+		featureNS: 'http://bsr.ores.be/test01',
+		featureType: 'Districts',
+		srsName: 'EPSG:31370'
+	});	
 	f.set('DistrictName', "XXX");
 	//f.set('DistrictId', 12345);
 	//f.setGeometryName("DistrictGeo"); 
@@ -182,6 +173,11 @@ var selectPointerMove = new ol.interaction.Select({
 
 map.addInteraction(selectPointerMove);
 
+var snap = new ol.interaction.Snap({
+	source: layerVector.getSource()
+});
+map.addInteraction(snap);
+
 var select = new ol.interaction.Select({
 	style: new ol.style.Style({
 		stroke: new ol.style.Stroke({
@@ -191,6 +187,7 @@ var select = new ol.interaction.Select({
 });
 
 var interaction;
+var dirty;
 
 $('.btnMenu').on('click', function(event) {
 	$('.btnMenu').removeClass('orange');
@@ -202,7 +199,10 @@ $('.btnMenu').on('click', function(event) {
 		case 'btnSelect':
 			interaction = new ol.interaction.Select({
 				style: new ol.style.Style({
-					stroke: new ol.style.Stroke({color: '#f50057', width: 2})
+					stroke: new ol.style.Stroke({
+						color: '#f50057', 
+						width: 2
+					})
 				})
 			});
 			map.addInteraction(interaction);
@@ -220,13 +220,7 @@ $('.btnMenu').on('click', function(event) {
 				features: select.getFeatures()
 			});
 			map.addInteraction(interaction);
-			
-			var snap = new ol.interaction.Snap({
-				source: layerVector.getSource()
-			});
-			map.addInteraction(snap);
-			
-			dirty = {};
+			dirty = [];
 			select.getFeatures().on('add', function(e) {
 				e.element.on('change', function(e) {
 					dirty[e.target.getId()] = true;
